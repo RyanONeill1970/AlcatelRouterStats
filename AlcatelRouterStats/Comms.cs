@@ -25,9 +25,8 @@
         /// <param name="username">The encoded username.</param>
         /// <param name="password">The encoded password.</param>
         /// <returns></returns>
-        internal async Task<string> PostLoginAsync(string ipAddress, string requestVerificationKey, string username, string password)
+        internal async Task<LoginResponse> PostLoginAsync(string ipAddress, string requestVerificationKey, string username, string password)
         {
-
             var client = httpClientFactory.CreateClient();
 
             var url = $"http://{ipAddress}/jrd/webapi";
@@ -45,23 +44,12 @@
             var content = new StringContent(json);
 
             // Don't use client.PostAsJsonAsync here as it is chunked and does not send the content-length header which the tiny brain of the router can't understand (it hangs).
-            var response = await client.PostAsync(url, content);
+            var responseMessage = await client.PostAsync(url, content);
+            var responseJson = await responseMessage.Content.ReadAsStringAsync();
 
-            // TODO: Parse out to LoginResponse.
-            return await response.Content.ReadAsStringAsync();
+            var response = JsonSerializer.Deserialize<LoginResponse>(responseJson);
+
+            return response;
         }
-
-        public class Result
-        {
-            public int token { get; set; }
-        }
-
-        public class Root
-        {
-            public string jsonrpc { get; set; }
-            public Result result { get; set; }
-            public string id { get; set; }
-        }
-
     }
 }

@@ -37,14 +37,13 @@
 
             var response = await comms.PostLoginAsync(appSettings.IpAddress, extractedSecrets.RequestVerificationKey, username, password);
 
-            Console.WriteLine(response);
+            if (response.Error != null)
+            {
+                logger.LogError("Unable to login, token request returned: {errorCode} with message of '{errorMessage}'.", response.Error.Code, response.Error.Message);
+                return;
+            }
 
-            // Response if good is (200):
-            //  { "jsonrpc": "2.0", "result": { "token": 46803568 }, "id": "12" }
-            // Cookie?
-            // 
-            // Response if bad is (200):
-            //  { "jsonrpc": "2.0", "error": { "code": "010101", "message": "Username or Password is not correct." }, "id": "12" }
+            logger.LogInformation("Logged in OK, token returned was {token}.", response.Result.Token);
 
             // To get the network info, POST.
             //{"id":"12","jsonrpc":"2.0","method":"GetNetworkInfo","params":{}}         * */
@@ -52,7 +51,6 @@
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
         }
-   }
+    }
 }
