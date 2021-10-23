@@ -1,5 +1,6 @@
 ﻿namespace AlcatelRouterStats
 {
+    using AlcatelRouterStats.Audio;
     using AlcatelRouterStats.Models;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@
     using Microsoft.Extensions.Logging;
     using System;
     using System.IO;
+    using System.Runtime.InteropServices;
 
     public class Startup
     {
@@ -15,6 +17,17 @@
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<Comms>();
             serviceCollection.AddHostedService<Worker>();
+
+            // Register a different speech output depending on the platform.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                serviceCollection.AddTransient<System.Speech.Synthesis.SpeechSynthesizer>();
+                serviceCollection.AddTransient<ISpeech, SpeechWindows>();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                serviceCollection.AddTransient<ISpeech, SpeechWindows>();
+            }
 
             var appSettings = hostBuilderContext.Configuration.GetSection("AppSettings").Get<AppSettings>();
             serviceCollection.AddSingleton(appSettings);

@@ -1,9 +1,11 @@
 ﻿namespace AlcatelRouterStats
 {
+    using AlcatelRouterStats.Audio;
     using AlcatelRouterStats.Models;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using System;
+    using System.Speech.Synthesis;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -12,12 +14,14 @@
         private readonly AppSettings appSettings;
         private readonly Comms comms;
         private readonly ILogger<Worker> logger;
+        private readonly ISpeech speech;
 
-        public Worker(AppSettings appSettings, Comms comms, ILogger<Worker> logger)
+        public Worker(AppSettings appSettings, Comms comms, ILogger<Worker> logger, ISpeech speech)
         {
             this.appSettings = appSettings;
             this.comms = comms;
             this.logger = logger;
+            this.speech = speech;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -41,9 +45,28 @@
 
             logger.LogInformation("Logged in OK, token returned was {token}.", loginResponse.Result.Token);
 
-            var networkInfoResponse = await comms.RequestNetworkInfoAsync(extractedSecrets.RequestVerificationKey, loginResponse.Result.Token);
+            while (true)
+            {
+                var networkInfoResponse = await comms.RequestNetworkInfoAsync(extractedSecrets.RequestVerificationKey, loginResponse.Result.Token);
 
-            logger.LogInformation("Signal to noise ration is {SNR}.", networkInfoResponse.Result.SINR);
+                if (networkInfoResponse.Error != null)
+                {
+                    logger.LogInformation("Logging in again.");
+                    loginResponse = await comms.LoginAsync(extractedSecrets.RequestVerificationKey);
+
+                    if (loginResponse.Error != null)
+                    {
+                        // TODO: Use Polly.
+                        logger.LogError("Unable to login, refresh token request returned: {errorCode} with message of '{errorMessage}'.", loginResponse.Error.Code, loginResponse.Error.Message);
+                        return;
+                    }
+                    logger.LogInformation("Logged in OK, token returned was {token}.", loginResponse.Result.Token);
+                    continue;
+                }
+
+                logger.LogInformation("Signal to noise ration is {SNR}.", networkInfoResponse.Result.SINR);
+                speech.Speek(networkInfoResponse.Result.SINR);
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
