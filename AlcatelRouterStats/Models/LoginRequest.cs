@@ -2,14 +2,8 @@
 {
     using System.Text.Json.Serialization;
 
-    public class LoginRequest
+    public class LoginRequest : RequestBase
     {
-        [JsonPropertyName("id")]
-        public string Id { get; } = "12";
-
-        [JsonPropertyName("jsonrpc")]
-        public string JsonRpc { get; } = "2.0";
-
         [JsonPropertyName("method")]
         public string Method { get; } = "Login";
 

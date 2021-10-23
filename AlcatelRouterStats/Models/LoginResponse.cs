@@ -5,10 +5,10 @@
     internal class LoginResponse : ResponseBase
     {
         [JsonPropertyName("result")]
-        public Result Result { get; set; }
+        public LoginResult Result { get; set; }
     }
 
-    internal class Result
+    internal class LoginResult
     {
         [JsonPropertyName("token")]
         public int Token { get; set; }

@@ -31,22 +31,19 @@
 
             logger.LogInformation("Secrets downloaded, {0}", extractedSecrets);
 
-            // Encode login details.
-            var username = Encoder.Encode(appSettings.Username);
-            var password = Encoder.Encode(appSettings.Password);
+            var loginResponse = await comms.LoginAsync(extractedSecrets.RequestVerificationKey);
 
-            var response = await comms.PostLoginAsync(appSettings.IpAddress, extractedSecrets.RequestVerificationKey, username, password);
-
-            if (response.Error != null)
+            if (loginResponse.Error != null)
             {
-                logger.LogError("Unable to login, token request returned: {errorCode} with message of '{errorMessage}'.", response.Error.Code, response.Error.Message);
+                logger.LogError("Unable to login, token request returned: {errorCode} with message of '{errorMessage}'.", loginResponse.Error.Code, loginResponse.Error.Message);
                 return;
             }
 
-            logger.LogInformation("Logged in OK, token returned was {token}.", response.Result.Token);
+            logger.LogInformation("Logged in OK, token returned was {token}.", loginResponse.Result.Token);
 
-            // To get the network info, POST.
-            //{"id":"12","jsonrpc":"2.0","method":"GetNetworkInfo","params":{}}         * */
+            var networkInfoResponse = await comms.RequestNetworkInfoAsync(extractedSecrets.RequestVerificationKey, loginResponse.Result.Token);
+
+            logger.LogInformation("Signal to noise ration is {SNR}.", networkInfoResponse.Result.SINR);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

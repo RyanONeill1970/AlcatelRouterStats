@@ -1,6 +1,6 @@
 ﻿namespace AlcatelRouterStats.Models
 {
-    internal class AppSettings
+    public class AppSettings
     {
         public string IpAddress { get; set; }
 
