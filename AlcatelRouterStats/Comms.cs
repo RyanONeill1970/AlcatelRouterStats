@@ -38,8 +38,6 @@
             // User agent seems to be required. Does the router act differently if are an API or mobile device? Smells like a security issue to me.
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36 Edg/94.0.992.50");
             client.DefaultRequestHeaders.Add("_TclRequestVerificationKey", requestVerificationKey);
-            // On login request we don't have a token (because that's what we are asking for) but it seems to be a standard requirement. It can be blank.
-            //client.DefaultRequestHeaders.Add("_TclRequestVerificationToken", "");
             // This is checked server side, if you don't sent the correct ip address you won't get a response. Security by obscurity!
             client.DefaultRequestHeaders.Add("Referer", $"http://{ipAddress}/index.html");
 
