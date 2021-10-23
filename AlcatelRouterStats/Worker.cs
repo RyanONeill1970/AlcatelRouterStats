@@ -51,6 +51,7 @@
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            return Task.CompletedTask;
         }
     }
 }
