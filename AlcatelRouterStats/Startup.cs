@@ -26,7 +26,7 @@
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                serviceCollection.AddTransient<ISpeech, SpeechWindows>();
+                serviceCollection.AddTransient<ISpeech, SpeechOsx>();
             }
 
             var appSettings = hostBuilderContext.Configuration.GetSection("AppSettings").Get<AppSettings>();
